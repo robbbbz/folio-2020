@@ -12,26 +12,12 @@ export const sketch = ({ context }) => {
   var el = document.querySelector('canvas');
   document.getElementById("container").appendChild(el);
 
- const vertexShader = `
-  void main () {
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-  }
-`;
 
-  const fragmentShader = `
-  uniform vec3 color;
-  void main () {
-    gl_FragColor = vec4(color, 1.0);
-  }
-`; 
-
-
-
-const material = new THREE.ShaderMaterial({
+  const material = new THREE.ShaderMaterial({
   vertexShader,
   fragmentShader,
   uniforms: {
-    color: { value: new THREE.Color('yellow') }
+    color: { value: new THREE.Color('green') }
   },
   side: THREE.DoubleSide
 });
