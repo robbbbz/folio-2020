@@ -1,0 +1,15 @@
+{
+  "name": "folio",
+  "version": "1.0.0",
+  "description": "Experiment with a webpack boilerplate",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "canvas-sketch": "^0.7.4",
+    "three": "^0.122.0"
+  }
+}
