@@ -1,33 +1,41 @@
-
-
-// Ensure ThreeJS is in global scope for the 'examples/'
 import * as THREE from 'three';
-
-// Include any additional ThreeJS examples below
-//import GLTFModel from '../models/scene.gltf'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-//import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-//import { MeshSurfaceSampler } from 'three/examples/jsm/math/MeshSurfaceSampler.js';
-
-
+import {vertexShader} from "../shaders/vertex.js"
+import {fragmentShader} from "../shaders/fragment.js"
 const canvasSketch = require("canvas-sketch");
 
-export const settings = {
-  /*   // Make the loop animated
-    // dimensions: [512,512],
-    // units : 'cm',
-    scaleToView: 'true',
-    pixelsPerInch: 72, 
-    orientation: 'landscape', */
-  animate: true,
-  // Get a WebGL canvas rather than 2D
-  context: "webgl"
-};
+
+
 
 export const sketch = ({ context }) => {
     
-var el = document.querySelector('canvas');
-document.getElementById("container").appendChild(el);
+  var el = document.querySelector('canvas');
+  document.getElementById("container").appendChild(el);
+
+ const vertexShader = `
+  void main () {
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+`;
+
+  const fragmentShader = `
+  uniform vec3 color;
+  void main () {
+    gl_FragColor = vec4(color, 1.0);
+  }
+`; 
+
+
+
+const material = new THREE.ShaderMaterial({
+  vertexShader,
+  fragmentShader,
+  uniforms: {
+    color: { value: new THREE.Color('yellow') }
+  },
+  side: THREE.DoubleSide
+});
+
 
   // Create a renderer
   const renderer = new THREE.WebGLRenderer({
@@ -67,50 +75,14 @@ document.getElementById("container").appendChild(el);
   scene.add(lightGroup);
   scene.add(new THREE.PointLightHelper(light, 2))
 
-  const plane = new THREE.Plane(new THREE.Vector3(1, 90, 1), 8);
+  const geometry = new THREE.PlaneGeometry( 5, 20, 32 );
+  const material2 = new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide} );
 
+  const plane = new THREE.Mesh( geometry, material );
+  scene.add( plane );
   scene.add(new THREE.GridHelper(100, 40));
 
-  // Setup GLTF Model Loader
-  //const modelLoader = new GLTFLoader();
-  // Load a glTF resource
-
-
-  const vertexShader = `
-  varying vec2 vUv;
-
-  void main () {
-    vUv = uv;
-
-    vec4 mvPosition =  modelViewMatrix * vec4(position, 1.0);
-    gl_PointSize = 1000. * (1. / - mvPosition.z);
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-  }
-`;
-
-  const fragmentShader = `
-  varying vec2 vUv;
-  varying vec3 vNormal;
-  uniform vec3 color;
-
-  void main () {
-    float dist = length(gl_PointCoord - vec2(0.5));
-    float mask = smoothstep(.45,.5,dist);
-    float d = vUv.y;
-    gl_FragColor = vec4(color * d, 1.0);
-    gl_FragColor = vec4(mask, mask, 1.0, 1.0);
-    if(mask > 0.1) discard;
-  }
-`;
-
-  const material = new THREE.ShaderMaterial({
-    vertexShader,
-    fragmentShader,
-    uniforms: {
-      color: { value: new THREE.Color('tomato') },
-    }
-  });
-
+ 
   /*
   modelLoader.load(
     // resource URL
@@ -204,3 +176,14 @@ document.getElementById("container").appendChild(el);
   };
 };
 
+export const settings = {
+  /*   // Make the loop animated
+    // dimensions: [512,512],
+    // units : 'cm',
+    scaleToView: 'true',
+    pixelsPerInch: 72, 
+    orientation: 'landscape', */
+  animate: true,
+  // Get a WebGL canvas rather than 2D
+  context: "webgl"
+};
