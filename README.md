@@ -1,2 +1,2 @@
-# three-js-experiment
-Experiment with a webpack boilerplate
+# folio-2020
+A brand new folio made with Parcels to finish the year in better conditions
