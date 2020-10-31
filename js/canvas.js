@@ -1,31 +1,39 @@
-import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import {vertexShader} from "../shaders/vertex.js"
-import {fragmentShader} from "../shaders/fragment.js"
-const canvasSketch = require("canvas-sketch");
+import * as THREE from "three";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import { vertexShader } from "../shaders/vertex.js";
+import { fragmentShader } from "../shaders/fragment.js";
 
 
+/*
+1- create shader material
+2- create an array and for each element:
+    clone the shader material
+    pass textures in uniforms
+    create a new mesh
+3- texture sample2d in the fragment
 
 
+*/
 export const sketch = ({ context }) => {
-    
-  var el = document.querySelector('canvas');
+  var el = document.querySelector("canvas");
   document.getElementById("container").appendChild(el);
 
-
   const material = new THREE.ShaderMaterial({
-  vertexShader,
-  fragmentShader,
-  uniforms: {
-    color: { value: new THREE.Color('green') }
-  },
-  side: THREE.DoubleSide
-});
-
+    vertexShader,
+    fragmentShader,
+    uniforms: {
+      color: { value: new THREE.Color("tomato") },
+      time: { value: 0 },
+      resolution: {type: "v4", value: new THREE.Vector4()},
+      texture: {type: "f", value : null},
+      uvRate:{ value: new THREE.Vector2}
+    },
+    side: THREE.DoubleSide,
+  });
 
   // Create a renderer
   const renderer = new THREE.WebGLRenderer({
-    canvas: context.canvas
+    canvas: context.canvas,
   });
 
   // WebGL background color
@@ -47,8 +55,6 @@ export const sketch = ({ context }) => {
   // We load once for the sake of optimization
   const textureLoader = new THREE.TextureLoader();
 
-
-
   // Setup Light
   const lightGroup = new THREE.Group();
 
@@ -59,15 +65,47 @@ export const sketch = ({ context }) => {
   lightGroup.add(light);
   lightGroup.add(light2);
   scene.add(lightGroup);
-  scene.add(new THREE.PointLightHelper(light, 2))
+  scene.add(new THREE.PointLightHelper(light, 2));
 
-  const geometry = new THREE.PlaneGeometry( 5, 20, 32 );
-  const material2 = new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide} );
+  const geometry = new THREE.PlaneGeometry(5, 5, 5);
+  const material2 = new THREE.MeshBasicMaterial({
+    color: 0xffff00,
+    side: THREE.DoubleSide,
+  });
 
-  const plane = new THREE.Mesh( geometry, material );
-  scene.add( plane );
+  //const plane = new THREE.Mesh(geometry, material);
+  //scene.add(plane);
   scene.add(new THREE.GridHelper(100, 40));
 
+  let materials = [];
+  let meshes = [];
+
+  let handleImages = () => {
+    // we should preload the pictures first
+    let images = [...document.querySelectorAll("img")];
+    console.log(images)
+    images.forEach((im, i) => {
+      // don't need to create a new material, just need to clone one
+      let mat = material.clone();
+      materials.push(mat);
+      mat.uniforms.texture.value = new THREE.Texture(im);
+      // prevent downscale
+      mat.uniforms.texture.value.minFilter = THREE.LinearFilter;
+      mat.uniforms.texture.value.needsUpdate = true;
+    
+      // 0.8 is the aspect ratio = width/height
+      let geo = new THREE.PlaneBufferGeometry(8,10,20,20);
+      let mesh = new THREE.Mesh(geo, mat);
+      //meshes.push(mesh)
+      scene.add(mesh);
+      meshes.push(mesh);
+      mesh.position.y = i * 4;
+
+    });
+  };
+
+
+  handleImages();
  
   /*
   modelLoader.load(
@@ -150,7 +188,14 @@ export const sketch = ({ context }) => {
     },
     // Update & render your scene here
     render({ time }) {
-
+      if(materials){
+        materials.forEach(m=>{
+          m.uniforms.time.value = time;
+        });
+      }
+      
+      //material.uniforms.time.value = time;
+      
       //controls.update();
       renderer.render(scene, camera);
     },
@@ -158,7 +203,7 @@ export const sketch = ({ context }) => {
     unload() {
       // controls.dispose();
       renderer.dispose();
-    }
+    },
   };
 };
 
@@ -171,5 +216,5 @@ export const settings = {
     orientation: 'landscape', */
   animate: true,
   // Get a WebGL canvas rather than 2D
-  context: "webgl"
+  context: "webgl",
 };
