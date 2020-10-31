@@ -17,6 +17,7 @@ import { fragmentShader } from "../shaders/fragment.js";
 5- update shader's time uniforms in render
 6- apply scroll position to update geometries position
 7- group meshes + bend + rotate
+8- apply modifications in each mesh w/ o.dist 
 */
 
 let materials = [];
@@ -34,14 +35,17 @@ export const sketch = ({ context }) => {
       time: { value: 0 },
       resolution: {type: "v4", value: new THREE.Vector4()},
       texture: {type: "f", value : null},
+      distanceToCenter: {type: "f", value : 0},
       uvRate:{ value: new THREE.Vector2}
     },
     side: THREE.DoubleSide,
+    transparent:true
   });
 
   // Create a renderer
   const renderer = new THREE.WebGLRenderer({
     canvas: context.canvas,
+   // antialias: true
   });
 
   // WebGL background color

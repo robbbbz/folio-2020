@@ -2,11 +2,13 @@
 export const vertexShader = /* glsl*/ `
 varying vec2 vUv;
 float PI = 3.14159265358;
+uniform float distanceToCenter;
 
 uniform float time;
 void main () {
   //vUv = uv;
-  vUv = (uv - vec2(0.5))*0.9 + vec2(0.5);
+  vUv = (uv - vec2(0.5))*(0.8*distanceToCenter)+ vec2(0.5);
+  //vUv = (uv - vec2(0.5))*0.9 + vec2(0.5);
 
   // bending geo
   vec3 pos = position;
