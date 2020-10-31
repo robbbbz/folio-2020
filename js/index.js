@@ -10,6 +10,10 @@ let elems = [...document.querySelectorAll(".n")];
 
 let objs = Array(5).fill({ dist: 0 });
 
+
+let attractMode = false;
+let attractTo = 0;
+
 window.addEventListener("wheel", (e) => {
   // delta Y => strength of scroll
   speed += e.deltaY * 0.0003;
@@ -28,6 +32,12 @@ window.addEventListener("wheel", (e) => {
 });
 
 function raf() {
+
+  if(attractMode){
+    console.log("in")
+    position += -(position - attractTo)*0.05;
+  }
+
   window.requestAnimationFrame(raf);
 
   objs.forEach((o, i) => {
@@ -45,8 +55,27 @@ function raf() {
       meshes[i].scale.set(wheelScale, wheelScale, wheelScale);
       meshes[i].material.uniforms.distanceToCenter.value = o.dist;
     }
-  });
+  }
+);
 }
 
 raf();
 canvasSketch(sketch, settings);
+
+let navs = [...document.querySelectorAll('li')];
+let nav = document.querySelector('.nav');
+
+nav.addEventListener('mouseenter',()=>{
+  attractMode = true;
+})
+nav.addEventListener('mouseover',()=>{
+  attractMode = true;
+})
+
+navs.forEach((el)=>{
+  
+  el.addEventListener('mouseover',(e)=>{
+    console.log(e.target.getAttribute('data-nav'));
+    attractTo = Number(e.target.getAttribute('data-nav'));
+  })
+})

@@ -49,23 +49,44 @@
             pointer-events: none;
         }
 
-
+        ul{
+            position:fixed;
+            top:0;
+            right:0;
+            z-index:100;
+            border: 1px solid black;
+            width:50px;
+            list-style:none;
+            margin:0;
+            padding:0;
+        }
+        li{
+            font-size:50px;
+        }
     </style>
+    <ul class="nav">
+        <li data-nav="0">1</li>
+        <li data-nav="1">2</li>
+        <li data-nav="2">3</li>
+        <li data-nav="3">4</li>
+        <li data-nav="4">5</li>
+    </ul>
+
     <div id="wrap">
         <div class="n">
-            <img class="thumbnails"width="120"  src="./assets/img.png">
+            <img class="thumbnails" width="120" src="./assets/img.png">
         </div>
         <div class="n n1">
-           <img class="thumbnails"width="120"  src="./assets/img0.png">
+            <img class="thumbnails" width="120" src="./assets/img0.png">
         </div>
         <div class="n n2">
-          <img class="thumbnails" width="120" src="./assets/img.png">
+            <img class="thumbnails" width="120" src="./assets/img.png">
         </div>
         <div class="n n3">
-           <img class="thumbnails"width="120"  src="./assets/img0.png">
+            <img class="thumbnails" width="120" src="./assets/img0.png">
         </div>
         <div class="n n4">
-          <img class="thumbnails" width="120" src="./assets/img.png">
+            <img class="thumbnails" width="120" src="./assets/img.png">
         </div>
     </div>
     <div id="block">Hello</div>
