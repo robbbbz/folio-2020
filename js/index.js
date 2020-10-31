@@ -1,4 +1,4 @@
-import {sketch,settings} from "./canvas.js"
+import {sketch,settings,meshes} from "./canvas.js"
 
 
 const canvasSketch = require("canvas-sketch");
@@ -32,6 +32,7 @@ window.addEventListener("wheel", (e)=>{
 })
 
 
+
 function raf(){
   window.requestAnimationFrame(raf);
 
@@ -40,8 +41,12 @@ function raf(){
     o.dist = 1 - o.dist**2;
     elems[i].style.transform = `scale(${1 +2 *o.dist})`
   })
+  meshes.forEach((mesh,i)=>{
+    mesh.position.x = -i *10 + (position *10);
+  })
   
 }
+console.log(meshes)
 
 raf();
 canvasSketch(sketch, settings);

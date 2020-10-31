@@ -6,14 +6,21 @@ import { fragmentShader } from "../shaders/fragment.js";
 
 /*
 1- create shader material
-2- create an array and for each element:
-    clone the shader material
-    pass textures in uniforms
-    create a new mesh
+2- create an array and we pass it pictures
+  then for each element:
+    - clone the shader material
+    - pass textures in uniforms
+    - create a new mesh
+    - add mesh to scene
 3- texture sample2d in the fragment
-
-
+4- create another array filled with materials // create an array with meshes
+5- update shader's time uniforms in render
+6- use scroll position to update geometries position
 */
+
+let materials = [];
+export let meshes = [];
+
 export const sketch = ({ context }) => {
   var el = document.querySelector("canvas");
   document.getElementById("container").appendChild(el);
@@ -41,7 +48,7 @@ export const sketch = ({ context }) => {
 
   // Setup a camera
   const camera = new THREE.PerspectiveCamera(50, 1, 0.01, 200);
-  camera.position.set(0, 0, -40);
+  camera.position.set(0, 0, -50);
   // Look at the point of origin
   camera.lookAt(new THREE.Vector3());
 
@@ -75,10 +82,9 @@ export const sketch = ({ context }) => {
 
   //const plane = new THREE.Mesh(geometry, material);
   //scene.add(plane);
-  scene.add(new THREE.GridHelper(100, 40));
+  //scene.add(new THREE.GridHelper(100, 40));
 
-  let materials = [];
-  let meshes = [];
+
 
   let handleImages = () => {
     // we should preload the pictures first
@@ -99,7 +105,6 @@ export const sketch = ({ context }) => {
       //meshes.push(mesh)
       scene.add(mesh);
       meshes.push(mesh);
-      mesh.position.y = i * 4;
 
     });
   };
@@ -193,7 +198,7 @@ export const sketch = ({ context }) => {
           m.uniforms.time.value = time;
         });
       }
-      
+  
       //material.uniforms.time.value = time;
       
       //controls.update();
