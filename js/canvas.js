@@ -16,6 +16,7 @@ import { fragmentShader } from "../shaders/fragment.js";
 4- create another array filled with materials // create an array with meshes
 5- update shader's time uniforms in render
 6- apply scroll position to update geometries position
+7- group meshes + bend + rotate
 */
 
 let materials = [];
@@ -98,13 +99,24 @@ export const sketch = ({ context }) => {
       // prevent downscale
       mat.uniforms.texture.value.minFilter = THREE.LinearFilter;
       mat.uniforms.texture.value.needsUpdate = true;
-    
+
+      let group = new THREE.Group();
+      
       // 0.8 is the aspect ratio = width/height
       let geo = new THREE.PlaneBufferGeometry(8,10,20,20);
       let mesh = new THREE.Mesh(geo, mat);
-      //meshes.push(mesh)
-      scene.add(mesh);
+      
+      group.add(mesh);
+
+      scene.add(group);
       meshes.push(mesh);
+      
+
+      group.rotation.y = - 0.5;
+/* 
+      group.position.y = 20;
+      group.rotation.x = - 0.5;
+    */
 
     });
   };
