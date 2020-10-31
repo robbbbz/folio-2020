@@ -15,7 +15,7 @@ let objs = Array(5).fill({dist:0});
 
 window.addEventListener("wheel", (e)=>{
   // delta Y => strength of scroll
-  speed += e.deltaY * 0.0003;
+  speed += e.deltaY * 0.00018;
   position += speed;
   // decrease the speed
   speed *=0.8;
@@ -32,21 +32,25 @@ window.addEventListener("wheel", (e)=>{
 })
 
 
-
 function raf(){
+
   window.requestAnimationFrame(raf);
 
   objs.forEach((o,i)=>{
     o.dist = Math.min(Math.abs(position - i),1);
-    o.dist = 1 - o.dist**2;
+    o.dist = 1 - o.dist**2; 
     elems[i].style.transform = `scale(${1 +2 *o.dist})`
-  })
-  meshes.forEach((mesh,i)=>{
-    mesh.position.x = -i *10 + (position *10);
-  })
-  
+    // apply scroll position to update geometries position
+    // check if meshes exists otherwise error because no meshes  😥😥😥😥😥 
+    if(meshes.length>0){
+      let wheelScale = 1+ objs[i].dist ;
+      meshes[i].position.x = -i *10 + (position *10);
+     meshes[i].scale.set(wheelScale,wheelScale,wheelScale);
+    }
+  }) 
+
 }
-console.log(meshes)
+
 
 raf();
 canvasSketch(sketch, settings);

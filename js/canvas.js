@@ -15,7 +15,7 @@ import { fragmentShader } from "../shaders/fragment.js";
 3- texture sample2d in the fragment
 4- create another array filled with materials // create an array with meshes
 5- update shader's time uniforms in render
-6- use scroll position to update geometries position
+6- apply scroll position to update geometries position
 */
 
 let materials = [];
@@ -200,7 +200,6 @@ export const sketch = ({ context }) => {
       }
   
       //material.uniforms.time.value = time;
-      
       //controls.update();
       renderer.render(scene, camera);
     },
