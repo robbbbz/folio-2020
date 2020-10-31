@@ -1,37 +1,51 @@
+import * as THREE from "three";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import { vertexShader } from "../shaders/vertex.js";
+import { fragmentShader } from "../shaders/fragment.js";
 
 
-// Ensure ThreeJS is in global scope for the 'examples/'
-import * as THREE from 'three';
+/*
+1- create shader material
+2- create an array and we pass it pictures
+  then for each element:
+    - clone the shader material
+    - pass textures in uniforms
+    - create a new mesh
+    - add mesh to scene
+3- texture sample2d in the fragment
+4- create another array filled with materials // create an array with meshes
+5- update shader's time uniforms in render
+6- apply scroll position to update geometries position
+7- group meshes + bend + rotate
+8- apply modifications in each mesh w/ o.dist 
+*/
 
-// Include any additional ThreeJS examples below
-//import GLTFModel from '../models/scene.gltf'
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-//import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-//import { MeshSurfaceSampler } from 'three/examples/jsm/math/MeshSurfaceSampler.js';
-
-
-const canvasSketch = require("canvas-sketch");
-
-export const settings = {
-  /*   // Make the loop animated
-    // dimensions: [512,512],
-    // units : 'cm',
-    scaleToView: 'true',
-    pixelsPerInch: 72, 
-    orientation: 'landscape', */
-  animate: true,
-  // Get a WebGL canvas rather than 2D
-  context: "webgl"
-};
+let materials = [];
+export let meshes = [];
 
 export const sketch = ({ context }) => {
-    
-var el = document.querySelector('canvas');
-document.getElementById("container").appendChild(el);
+  var el = document.querySelector("canvas");
+  document.getElementById("container").appendChild(el);
+
+  const material = new THREE.ShaderMaterial({
+    vertexShader,
+    fragmentShader,
+    uniforms: {
+      color: { value: new THREE.Color("tomato") },
+      time: { value: 0 },
+      resolution: {type: "v4", value: new THREE.Vector4()},
+      texture: {type: "f", value : null},
+      distanceToCenter: {type: "f", value : 0},
+      uvRate:{ value: new THREE.Vector2}
+    },
+    side: THREE.DoubleSide,
+    transparent:true
+  });
 
   // Create a renderer
   const renderer = new THREE.WebGLRenderer({
-    canvas: context.canvas
+    canvas: context.canvas,
+   // antialias: true
   });
 
   // WebGL background color
@@ -39,7 +53,7 @@ document.getElementById("container").appendChild(el);
 
   // Setup a camera
   const camera = new THREE.PerspectiveCamera(50, 1, 0.01, 200);
-  camera.position.set(0, 0, -40);
+  camera.position.set(0, 0, -50);
   // Look at the point of origin
   camera.lookAt(new THREE.Vector3());
 
@@ -53,8 +67,6 @@ document.getElementById("container").appendChild(el);
   // We load once for the sake of optimization
   const textureLoader = new THREE.TextureLoader();
 
-
-
   // Setup Light
   const lightGroup = new THREE.Group();
 
@@ -65,52 +77,57 @@ document.getElementById("container").appendChild(el);
   lightGroup.add(light);
   lightGroup.add(light2);
   scene.add(lightGroup);
-  scene.add(new THREE.PointLightHelper(light, 2))
+  scene.add(new THREE.PointLightHelper(light, 2));
 
-  const plane = new THREE.Plane(new THREE.Vector3(1, 90, 1), 8);
-
-  scene.add(new THREE.GridHelper(100, 40));
-
-  // Setup GLTF Model Loader
-  //const modelLoader = new GLTFLoader();
-  // Load a glTF resource
-
-
-  const vertexShader = `
-  varying vec2 vUv;
-
-  void main () {
-    vUv = uv;
-
-    vec4 mvPosition =  modelViewMatrix * vec4(position, 1.0);
-    gl_PointSize = 1000. * (1. / - mvPosition.z);
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-  }
-`;
-
-  const fragmentShader = `
-  varying vec2 vUv;
-  varying vec3 vNormal;
-  uniform vec3 color;
-
-  void main () {
-    float dist = length(gl_PointCoord - vec2(0.5));
-    float mask = smoothstep(.45,.5,dist);
-    float d = vUv.y;
-    gl_FragColor = vec4(color * d, 1.0);
-    gl_FragColor = vec4(mask, mask, 1.0, 1.0);
-    if(mask > 0.1) discard;
-  }
-`;
-
-  const material = new THREE.ShaderMaterial({
-    vertexShader,
-    fragmentShader,
-    uniforms: {
-      color: { value: new THREE.Color('tomato') },
-    }
+  const geometry = new THREE.PlaneGeometry(5, 5, 5);
+  const material2 = new THREE.MeshBasicMaterial({
+    color: 0xffff00,
+    side: THREE.DoubleSide,
   });
 
+  //const plane = new THREE.Mesh(geometry, material);
+  //scene.add(plane);
+  //scene.add(new THREE.GridHelper(100, 40));
+
+
+
+  let handleImages = () => {
+    // we should preload the pictures first
+    let images = [...document.querySelectorAll("img")];
+    console.log(images)
+    images.forEach((im, i) => {
+      // don't need to create a new material, just need to clone one
+      let mat = material.clone();
+      materials.push(mat);
+      mat.uniforms.texture.value = new THREE.Texture(im);
+      // prevent downscale
+      mat.uniforms.texture.value.minFilter = THREE.LinearFilter;
+      mat.uniforms.texture.value.needsUpdate = true;
+
+      let group = new THREE.Group();
+      
+      // 0.8 is the aspect ratio = width/height
+      let geo = new THREE.PlaneBufferGeometry(8,10,20,20);
+      let mesh = new THREE.Mesh(geo, mat);
+      
+      group.add(mesh);
+
+      scene.add(group);
+      meshes.push(mesh);
+      
+
+      group.rotation.y = - 0.5;
+/* 
+      group.position.y = 20;
+      group.rotation.x = - 0.5;
+    */
+
+    });
+  };
+
+
+  handleImages();
+ 
   /*
   modelLoader.load(
     // resource URL
@@ -192,7 +209,13 @@ document.getElementById("container").appendChild(el);
     },
     // Update & render your scene here
     render({ time }) {
-
+      if(materials){
+        materials.forEach(m=>{
+          m.uniforms.time.value = time;
+        });
+      }
+  
+      //material.uniforms.time.value = time;
       //controls.update();
       renderer.render(scene, camera);
     },
@@ -200,7 +223,18 @@ document.getElementById("container").appendChild(el);
     unload() {
       // controls.dispose();
       renderer.dispose();
-    }
+    },
   };
 };
 
+export const settings = {
+  /*   // Make the loop animated
+    // dimensions: [512,512],
+    // units : 'cm',
+    scaleToView: 'true',
+    pixelsPerInch: 72, 
+    orientation: 'landscape', */
+  animate: true,
+  // Get a WebGL canvas rather than 2D
+  context: "webgl",
+};
